@@ -115,7 +115,9 @@ func (r *Reporter) spinLoop() {
 			a := r.active
 			w := r.w
 			r.mu.Unlock()
-			fr := spinnerFrames[r.spinIx.Add(1)%uint32(len(spinnerFrames))]
+			// Use a constant for the length to avoid G115 integer overflow warning during conversion.
+			const n = uint32(10)
+			fr := spinnerFrames[r.spinIx.Add(1)%n]
 			var line string
 			switch a {
 			case "auth":

@@ -3,6 +3,7 @@ package output
 import (
 	"encoding/csv"
 	"os"
+	"path/filepath"
 
 	"github.com/phuong-macair/gemini-api-scanner/internal/models"
 )
@@ -31,7 +32,18 @@ type CSVSink struct {
 
 // NewCSVSink creates a CSV writer and writes the header row.
 func NewCSVSink(path string) (*CSVSink, error) {
-	f, err := os.Create(path)
+	cleanPath := filepath.Clean(path)
+	dir := filepath.Dir(cleanPath)
+	base := filepath.Base(cleanPath)
+
+	// Use os.OpenRoot (Go 1.24+) to scope file access and prevent directory traversal (G304).
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return nil, err
+	}
+	defer root.Close()
+
+	f, err := root.Create(base)
 	if err != nil {
 		return nil, err
 	}

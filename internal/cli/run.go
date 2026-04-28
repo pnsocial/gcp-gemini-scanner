@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -208,7 +209,19 @@ func runScan(cfg *config.Config) error {
 }
 
 func newLogger(debug bool, logPath string) (*zap.Logger, func(), error) {
-	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	cleanPath := filepath.Clean(logPath)
+	dir := filepath.Dir(cleanPath)
+	base := filepath.Base(cleanPath)
+
+	// Use os.OpenRoot (Go 1.24+) to scope file access and prevent directory traversal (G304).
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer root.Close()
+
+	// Use 0o600 permissions to restrict access to the owner (G302).
+	f, err := root.OpenFile(base, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600)
 	if err != nil {
 		return nil, nil, err
 	}
