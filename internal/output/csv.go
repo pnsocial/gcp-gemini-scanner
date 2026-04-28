@@ -41,7 +41,7 @@ func NewCSVSink(path string) (*CSVSink, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer root.Close()
+	defer func() { _ = root.Close() }()
 
 	f, err := root.Create(base)
 	if err != nil {

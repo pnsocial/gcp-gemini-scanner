@@ -218,7 +218,7 @@ func newLogger(debug bool, logPath string) (*zap.Logger, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	defer root.Close()
+	defer func() { _ = root.Close() }()
 
 	// Use 0o600 permissions to restrict access to the owner (G302).
 	f, err := root.OpenFile(base, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600)
