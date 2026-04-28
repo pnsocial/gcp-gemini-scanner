@@ -1,0 +1,5 @@
+{"level":"warn","ts":"2026-04-28T12:00:01.123+0700","caller":"gcp/scanner.go:48","msg":"list keys denied","project":"no-access-mock-4004","error":"googleapi: Error 403: Project not visible to caller., forbidden"}
+{"level":"warn","ts":"2026-04-28T12:00:02.456+0700","caller":"gcp/scanner.go:48","msg":"list keys denied","project":"sandbox-grey-5999","error":"googleapi: Error 403: Restricted Client: API keys API has not been used in project before or it is disabled., forbidden"}
+{"level":"info","ts":"2026-04-28T12:00:05.789+0700","caller":"gcp/scanner.go:120","msg":"service usage ok","project":"sample-alpha-1001","gemini":"ENABLED","vertex":"ENABLED"}
+{"level":"warn","ts":"2026-04-28T12:00:08.012+0700","caller":"gcp/scanner.go:48","msg":"list keys denied","project":"prod-grey-3003","error":"googleapi: Error 403: Caller does not have permission., forbidden"}
+{"level":"debug","ts":"2026-04-28T12:00:09.345+0700","caller":"gcp/crawler.go:22","msg":"folder crawl depth","folder":"folders/1234567890","depth":3}
