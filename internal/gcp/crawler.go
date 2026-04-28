@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/phuong-macair/gemini-api-scanner/internal/config"
 	"github.com/phuong-macair/gemini-api-scanner/internal/models"
@@ -20,6 +21,33 @@ type frame struct {
 	depth  int
 }
 
+const folderResourcePrefix = "folders/"
+
+// folderResourceID returns the bare folder id if name is a folders/{id} resource name.
+func folderResourceID(name string) (id string, ok bool) {
+	if !strings.HasPrefix(name, folderResourcePrefix) {
+		return "", false
+	}
+	id = strings.TrimPrefix(name, folderResourcePrefix)
+	if id == "" {
+		return "", false
+	}
+	return id, true
+}
+
+// excludedHas reports whether bareOrResource matches an entry in excluded (bare id or folders/{id}).
+func excludedHas(excluded map[string]struct{}, bareOrResource string) bool {
+	if len(excluded) == 0 {
+		return false
+	}
+	if id, ok := folderResourceID(bareOrResource); ok {
+		_, hit := excluded[id]
+		return hit
+	}
+	_, hit := excluded[bareOrResource]
+	return hit
+}
+
 // Crawl performs iterative DFS over folders and enqueues projects (unless dryRun).
 func Crawl(
 	ctx context.Context,
@@ -29,6 +57,11 @@ func Crawl(
 	jobs chan<- models.ProjectInfo,
 	dryRun func(models.ProjectInfo),
 ) error {
+	excluded := make(map[string]struct{}, len(cfg.ExcludedFolderIDs))
+	for _, id := range cfg.ExcludedFolderIDs {
+		excluded[id] = struct{}{}
+	}
+
 	var stack []frame
 
 	if cfg.OrgID != "" {
@@ -43,6 +76,9 @@ func Crawl(
 		})
 	} else {
 		for _, fid := range cfg.FolderIDs {
+			if excludedHas(excluded, fid) {
+				continue
+			}
 			fname := fid
 			fn := fmt.Sprintf("folders/%s", fid)
 			if err := c.Do(ctx, func() error {
@@ -79,6 +115,10 @@ func Crawl(
 		fr := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 
+		if excludedHas(excluded, fr.parent) {
+			continue
+		}
+
 		if err := crawlProjectsAtParent(ctx, c, cfg, fr, organizationLabel, jobs, dryRun); err != nil {
 			return err
 		}
@@ -106,6 +146,9 @@ func Crawl(
 					break
 				}
 				return fmt.Errorf("list folders under %s: %w", fr.parent, err)
+			}
+			if excludedHas(excluded, sub.GetName()) {
+				continue
 			}
 			childPath := fr.path + "/" + sub.GetDisplayName()
 			if sub.GetDisplayName() == "" {

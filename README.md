@@ -79,6 +79,7 @@ go build -o gcp-gemini-scanner ./cmd/gemini-api-scanner
 |------|----------|-------|
 | `--orgid` | — | Organization ID |
 | `--folderid` | — | Folder ID, hỗ trợ nhiều ID cách nhau dấu phẩy |
+| `--excluded-folder-ids` | — | Folder ID bỏ qua (cách nhau dấu phẩy); không duyệt subtree và project bên dưới |
 | `--output` | `scan_results.csv` | Đường dẫn file CSV đầu ra |
 | `--workers` | `10` | Số goroutine xử lý song song |
 | `--rps` | `50` | Giới hạn request/giây để tránh vượt quota |

@@ -10,6 +10,9 @@ type Config struct {
 	OrgID     string
 	FolderIDs []string // multiple roots when --folderid is comma-separated
 
+	// ExcludedFolderIDs are bare folder IDs (--excluded-folder-ids); matching folders are not crawled.
+	ExcludedFolderIDs []string
+
 	Output   string
 	LogFile  string
 	Workers  int

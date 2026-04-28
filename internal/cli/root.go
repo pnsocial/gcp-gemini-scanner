@@ -9,15 +9,16 @@ import (
 )
 
 var (
-	orgID      string
-	folderID   string
-	outputPath string
-	logPath    string
-	workers    int
-	rps        int
-	maxDepth   int
-	dryRun     bool
-	debug      bool
+	orgID             string
+	folderID          string
+	excludedFolderIDs string
+	outputPath        string
+	logPath           string
+	workers           int
+	rps               int
+	maxDepth          int
+	dryRun            bool
+	debug             bool
 )
 
 // Execute runs the Cobra command tree.
@@ -34,6 +35,7 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.Flags().StringVar(&orgID, "orgid", "", "Google Cloud Organization ID (numeric)")
 	rootCmd.Flags().StringVar(&folderID, "folderid", "", "Folder ID(s), comma-separated")
+	rootCmd.Flags().StringVar(&excludedFolderIDs, "excluded-folder-ids", "", "Folder ID(s) to skip (comma-separated); subtree and projects under them are not crawled")
 	rootCmd.Flags().StringVar(&outputPath, "output", "scan_results.csv", "CSV output path")
 	rootCmd.Flags().StringVar(&logPath, "log", "", "Log file path (default: same basename as --output with .log)")
 	rootCmd.Flags().IntVar(&workers, "workers", 10, "Worker goroutines")
@@ -59,15 +61,16 @@ func buildConfig() (*config.Config, error) {
 		return nil, fmt.Errorf("--rps must be > 0")
 	}
 	cfg := &config.Config{
-		OrgID:     orgID,
-		FolderIDs: config.ParseFolderList(folderID),
-		Output:    outputPath,
-		LogFile:   config.ResolveLogPath(outputPath, logPath),
-		Workers:   workers,
-		RPS:       rps,
-		MaxDepth:  maxDepth,
-		DryRun:    dryRun,
-		Debug:     debug,
+		OrgID:             orgID,
+		FolderIDs:         config.ParseFolderList(folderID),
+		ExcludedFolderIDs: config.ParseFolderList(excludedFolderIDs),
+		Output:            outputPath,
+		LogFile:           config.ResolveLogPath(outputPath, logPath),
+		Workers:           workers,
+		RPS:               rps,
+		MaxDepth:          maxDepth,
+		DryRun:            dryRun,
+		Debug:             debug,
 	}
 	if scope == config.ScopeFolders && len(cfg.FolderIDs) == 0 {
 		return nil, fmt.Errorf("no valid folder ids in --folderid")

@@ -45,6 +45,7 @@ Thumbs.db
 # Temporary / local logs (sample scan_results.log is tracked; see negation below)
 *.log
 scan_results.csv
+scan_results.log
 
 # Cursor local debug traces
 .cursor/**/*.log
