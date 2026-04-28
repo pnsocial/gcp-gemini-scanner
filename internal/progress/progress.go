@@ -70,7 +70,7 @@ func (r *Reporter) stopSpinner(tag string, finalLn func()) {
 	}
 	close(ch)
 	r.spinDone.Wait()
-	fmt.Fprintln(r.w) // newline after last \r-rendered spinner line
+	_ = fmt.Fprintln(r.w) // newline after last \r-rendered spinner line
 
 	r.mu.Lock()
 	r.active = ""
@@ -94,7 +94,7 @@ func (r *Reporter) AbortActiveSpinnerQuietly() {
 	}
 	close(ch)
 	r.spinDone.Wait()
-	fmt.Fprintln(r.w)
+	_ = fmt.Fprintln(r.w)
 
 	r.mu.Lock()
 	r.stopSpin = nil
@@ -152,21 +152,21 @@ func (r *Reporter) AuthStart() {
 func (r *Reporter) AuthDone() {
 	r.stopSpinner("auth", func() {
 		r.authDone.Store(true)
-		fmt.Fprintf(r.w, "%s Xác thực thông tin (ADC)\n", symOK)
+		_, _ = fmt.Fprintf(r.w, "%s Xác thực thông tin (ADC)\n", symOK)
 	})
 }
 
 // AuthAbort terminates phase 1 with error (drops spinner safely).
 func (r *Reporter) AuthAbort() {
 	r.stopSpinner("auth", func() {
-		fmt.Fprintf(r.w, "%s Xác thực thông tin (ADC)\n", symErr)
+		_, _ = fmt.Fprintf(r.w, "%s Xác thực thông tin (ADC)\n", symErr)
 	})
 }
 
 // DiscoverAbort terminates phase 2 without a project count.
 func (r *Reporter) DiscoverAbort() {
 	r.stopSpinner("discover", func() {
-		fmt.Fprintf(r.w, "%s Tiếp nhận và rà soát Projects\n", symErr)
+		_, _ = fmt.Fprintf(r.w, "%s Tiếp nhận và rà soát Projects\n", symErr)
 	})
 }
 
@@ -185,7 +185,7 @@ func (r *Reporter) DiscoverDone(projectCount int) {
 
 	r.stopSpinner("discover", func() {
 		r.discoverDone.Store(true)
-		fmt.Fprintf(r.w, "%s Tiếp nhận và rà soát Projects        (%d projects)\n", symOK, projectCount)
+		_, _ = fmt.Fprintf(r.w, "%s Tiếp nhận và rà soát Projects        (%d projects)\n", symOK, projectCount)
 	})
 }
 
@@ -215,7 +215,7 @@ func (r *Reporter) ScanDone() {
 		if total > 0 {
 			suffix = fmt.Sprintf(" (%d / %d projects)", done, total)
 		}
-		fmt.Fprintf(r.w, "%s Kiểm tra API Endpoints%s\n", symOK, suffix)
+		_, _ = fmt.Fprintf(r.w, "%s Kiểm tra API Endpoints%s\n", symOK, suffix)
 	})
 }
 
@@ -227,14 +227,14 @@ func (r *Reporter) ReportStart() {
 // ReportDone completes phase 4.
 func (r *Reporter) ReportDone() {
 	r.stopSpinner("report", func() {
-		fmt.Fprintf(r.w, "%s Tổng hợp và xuất báo cáo\n", symOK)
+		_, _ = fmt.Fprintf(r.w, "%s Tổng hợp và xuất báo cáo\n", symOK)
 	})
 }
 
 // UserInterrupt stderr lines after Ctrl+C.
 func (r *Reporter) UserInterrupt() {
-	fmt.Fprintf(r.w, "^C\n")
-	fmt.Fprintf(r.w, "%s Bị ngắt bởi người dùng\n", symErr)
+	_, _ = fmt.Fprintf(r.w, "^C\n")
+	_, _ = fmt.Fprintf(r.w, "%s Bị ngắt bởi người dùng\n", symErr)
 }
 
 // SavingStart spins while flushing partial CSV after interrupt.
@@ -245,6 +245,6 @@ func (r *Reporter) SavingStart() {
 // SavingDone clears spinner and confirms row count saved.
 func (r *Reporter) SavingDone(csvPath string, rowCount int) {
 	r.stopSpinner("saving", func() {
-		fmt.Fprintf(r.w, "%s Đã lưu %d kết quả vào %s\n", symOK, rowCount, csvPath)
+		_, _ = fmt.Fprintf(r.w, "%s Đã lưu %d kết quả vào %s\n", symOK, rowCount, csvPath)
 	})
 }

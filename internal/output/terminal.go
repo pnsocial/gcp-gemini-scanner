@@ -35,5 +35,5 @@ func PrintResults(rows []models.OutputRow) {
 		)
 	}
 	_ = tw.Render()
-	fmt.Fprintf(os.Stdout, "\nChi tiết đầy đủ (Folder Path, Audit URL, ...) xem tại CSV đã lưu.\n")
+	_, _ = fmt.Fprintf(os.Stdout, "\nChi tiết đầy đủ (Folder Path, Audit URL, ...) xem tại CSV đã lưu.\n")
 }

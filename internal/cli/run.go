@@ -60,7 +60,7 @@ func runScan(cfg *config.Config) error {
 		prog.AuthAbort()
 		return err
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 	prog.AuthDone()
 
 	orgLabel := ""
@@ -203,7 +203,7 @@ func runScan(cfg *config.Config) error {
 	if len(summary) > 0 {
 		output.PrintResults(summary)
 	}
-	fmt.Fprintf(os.Stderr, "Log: %s\n", cfg.LogFile)
+	_, _ = fmt.Fprintf(os.Stderr, "Log: %s\n", cfg.LogFile)
 	return nil
 }
 
