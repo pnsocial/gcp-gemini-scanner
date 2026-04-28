@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	serviceusagepb "cloud.google.com/go/serviceusage/apiv1/serviceusagepb"
@@ -25,8 +26,19 @@ const (
 // ScanProject checks Gemini and Vertex APIs, then lists API keys matching restriction rules.
 func ScanProject(ctx context.Context, c *Client, info models.ProjectInfo) ([]models.OutputRow, models.ScanBrief) {
 	var brief models.ScanBrief
-	gemini, errG := getServiceStatus(ctx, c, info.ProjectID, GeminiService)
-	vertex, errV := getServiceStatus(ctx, c, info.ProjectID, VertexService)
+	var gemini, vertex string
+	var errG, errV error
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		gemini, errG = getServiceStatus(ctx, c, info.ProjectID, GeminiService)
+	}()
+	go func() {
+		defer wg.Done()
+		vertex, errV = getServiceStatus(ctx, c, info.ProjectID, VertexService)
+	}()
+	wg.Wait()
 	if errG != nil || errV != nil {
 		g, v := gemini, vertex
 		if errG != nil {
@@ -75,6 +87,7 @@ func buildOutputRowsFromKeys(keys []*apikeysv2.V2Key, info models.ProjectInfo, g
 			FullFolderPath:      info.FullFolderPath,
 			ProjectName:         info.ProjectName,
 			ProjectID:           info.ProjectID,
+			BillingAccountName:  info.BillingAccountName,
 			GeminiServiceStatus: gemini,
 			VertexServiceStatus: vertex,
 			KeyDisplayName:      k.DisplayName,
@@ -208,6 +221,7 @@ func deniedRow(info models.ProjectInfo, gemini, vertex string) models.OutputRow 
 		FullFolderPath:      info.FullFolderPath,
 		ProjectName:         info.ProjectName,
 		ProjectID:           info.ProjectID,
+		BillingAccountName:  info.BillingAccountName,
 		GeminiServiceStatus: gemini,
 		VertexServiceStatus: vertex,
 		KeyDisplayName:      "",
@@ -226,6 +240,7 @@ func errorRow(info models.ProjectInfo, gemini, vertex string, keyState string) m
 		FullFolderPath:      info.FullFolderPath,
 		ProjectName:         info.ProjectName,
 		ProjectID:           info.ProjectID,
+		BillingAccountName:  info.BillingAccountName,
 		GeminiServiceStatus: gemini,
 		VertexServiceStatus: vertex,
 		KeyDisplayName:      "",

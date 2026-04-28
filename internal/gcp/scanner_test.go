@@ -59,6 +59,7 @@ func TestBuildOutputRowsFromKeys_RESTExistingKeys(t *testing.T) {
 		FullFolderPath:      "folder",
 		ProjectName:         "demo",
 		ProjectID:           "prj-demo",
+		BillingAccountName:  "",
 		GeminiServiceStatus: "ENABLED",
 		VertexServiceStatus: "ENABLED",
 		KeyDisplayName:      "API key 1",

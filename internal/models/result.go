@@ -4,10 +4,11 @@ import "time"
 
 // ProjectInfo is enqueued for workers after resource discovery.
 type ProjectInfo struct {
-	Organization   string
-	FullFolderPath string
-	ProjectName    string
-	ProjectID      string
+	Organization       string
+	FullFolderPath     string
+	ProjectName        string
+	ProjectID          string
+	BillingAccountName string // from ProjectBillingInfo when available; empty if denied or unlinked
 }
 
 // ScanBrief aggregates per-project facts for summaries (runs even when no CSV key rows matched).
@@ -25,6 +26,7 @@ type OutputRow struct {
 	FullFolderPath      string
 	ProjectName         string
 	ProjectID           string
+	BillingAccountName  string
 	GeminiServiceStatus string
 	VertexServiceStatus string
 	KeyDisplayName      string

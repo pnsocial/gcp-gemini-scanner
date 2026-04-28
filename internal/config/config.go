@@ -20,6 +20,10 @@ type Config struct {
 	MaxDepth int
 	DryRun   bool
 	Debug    bool
+
+	// IncludeUnbilled keeps all discovered projects in the scan regardless of billing.
+	// When false (default), only projects with billing enabled on a billing account are scanned.
+	IncludeUnbilled bool
 }
 
 // ScopeKind indicates how the scan root was specified.

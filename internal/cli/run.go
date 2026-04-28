@@ -80,6 +80,11 @@ func runScan(cfg *config.Config) error {
 			prog.DiscoverAbort()
 			return err
 		}
+		list, err = gcp.EnrichBillingAndFilter(ctx, client, cfg.IncludeUnbilled, list, cfg.Workers)
+		if err != nil {
+			prog.DiscoverAbort()
+			return err
+		}
 		prog.DiscoverDone(len(list))
 		fmt.Println("Dry run — projects discovered (no service / API key scan):")
 		output.PrintDryRunProjects(list)
@@ -109,9 +114,12 @@ func runScan(cfg *config.Config) error {
 	close(jobsDiscover)
 	<-discDone
 
-	discMu.Lock()
+	projects, err = gcp.EnrichBillingAndFilter(ctx, client, cfg.IncludeUnbilled, projects, cfg.Workers)
+	if err != nil {
+		prog.DiscoverAbort()
+		return err
+	}
 	nProj := int64(len(projects))
-	discMu.Unlock()
 	prog.DiscoverDone(int(nProj))
 
 	csv, err := output.NewCSVSink(cfg.Output)

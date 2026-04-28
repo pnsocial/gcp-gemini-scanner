@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	billing "cloud.google.com/go/billing/apiv1"
 	"cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/serviceusage/apiv1"
 	"github.com/cenkalti/backoff/v4"
@@ -29,6 +30,7 @@ type Client struct {
 	Projects *resourcemanager.ProjectsClient
 	Orgs     *resourcemanager.OrganizationsClient
 	SU       *serviceusage.Client
+	Billing  *billing.CloudBillingClient
 	APIKeys  *apikeysv2.Service
 
 	Limit *rate.Limiter
@@ -70,12 +72,21 @@ func NewClient(ctx context.Context, rps int, log *zap.Logger, opts ...option.Cli
 		_ = su.Close()
 		return nil, err
 	}
+	bill, err := billing.NewCloudBillingClient(ctx, opts...)
+	if err != nil {
+		_ = folders.Close()
+		_ = projects.Close()
+		_ = orgs.Close()
+		_ = su.Close()
+		return nil, err
+	}
 	// One token per request; burst = rps to allow small bursts.
 	return &Client{
 		Folders:  folders,
 		Projects: projects,
 		Orgs:     orgs,
 		SU:       su,
+		Billing:  bill,
 		APIKeys:  keysSvc,
 		Limit:    rate.NewLimiter(rate.Limit(rps), rps),
 		Log:      log,
@@ -98,6 +109,9 @@ func (c *Client) Close() (errs error) {
 	}
 	if c.SU != nil {
 		_ = c.SU.Close()
+	}
+	if c.Billing != nil {
+		_ = c.Billing.Close()
 	}
 	return nil
 }
