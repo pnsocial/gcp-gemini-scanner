@@ -70,7 +70,7 @@ func (r *Reporter) stopSpinner(tag string, finalLn func()) {
 	}
 	close(ch)
 	r.spinDone.Wait()
-	_ = fmt.Fprintln(r.w) // newline after last \r-rendered spinner line
+	_, _ = fmt.Fprintln(r.w) // newline after last \r-rendered spinner line
 
 	r.mu.Lock()
 	r.active = ""
@@ -94,7 +94,7 @@ func (r *Reporter) AbortActiveSpinnerQuietly() {
 	}
 	close(ch)
 	r.spinDone.Wait()
-	_ = fmt.Fprintln(r.w)
+	_, _ = fmt.Fprintln(r.w)
 
 	r.mu.Lock()
 	r.stopSpin = nil
