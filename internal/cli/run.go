@@ -11,11 +11,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/phuong-macair/gemini-api-scanner/internal/config"
-	"github.com/phuong-macair/gemini-api-scanner/internal/gcp"
-	"github.com/phuong-macair/gemini-api-scanner/internal/models"
-	"github.com/phuong-macair/gemini-api-scanner/internal/output"
-	"github.com/phuong-macair/gemini-api-scanner/internal/progress"
+	"github.com/pnsocial/gemini-api-scanner/internal/config"
+	"github.com/pnsocial/gemini-api-scanner/internal/gcp"
+	"github.com/pnsocial/gemini-api-scanner/internal/models"
+	"github.com/pnsocial/gemini-api-scanner/internal/output"
+	"github.com/pnsocial/gemini-api-scanner/internal/progress"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -80,7 +80,7 @@ func runScan(cfg *config.Config) error {
 			prog.DiscoverAbort()
 			return err
 		}
-		list, err = gcp.EnrichBillingAndFilter(ctx, client, cfg.IncludeUnbilled, list, cfg.Workers)
+		list, err = gcp.EnrichBillingAndFilter(ctx, client, cfg.OnlyBilled, list, cfg.Workers)
 		if err != nil {
 			prog.DiscoverAbort()
 			return err
@@ -114,7 +114,7 @@ func runScan(cfg *config.Config) error {
 	close(jobsDiscover)
 	<-discDone
 
-	projects, err = gcp.EnrichBillingAndFilter(ctx, client, cfg.IncludeUnbilled, projects, cfg.Workers)
+	projects, err = gcp.EnrichBillingAndFilter(ctx, client, cfg.OnlyBilled, projects, cfg.Workers)
 	if err != nil {
 		prog.DiscoverAbort()
 		return err

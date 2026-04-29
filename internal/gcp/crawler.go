@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/phuong-macair/gemini-api-scanner/internal/config"
-	"github.com/phuong-macair/gemini-api-scanner/internal/models"
+	"github.com/pnsocial/gemini-api-scanner/internal/config"
+	"github.com/pnsocial/gemini-api-scanner/internal/models"
 	"go.uber.org/zap"
 	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"

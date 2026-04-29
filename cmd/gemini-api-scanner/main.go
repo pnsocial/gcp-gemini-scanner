@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/phuong-macair/gemini-api-scanner/internal/cli"
+	"github.com/pnsocial/gemini-api-scanner/internal/cli"
 )
 
 func main() {

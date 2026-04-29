@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/phuong-macair/gemini-api-scanner/internal/models"
+	"github.com/pnsocial/gemini-api-scanner/internal/models"
 	apikeysv2 "google.golang.org/api/apikeys/v2"
 )
 

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	serviceusagepb "cloud.google.com/go/serviceusage/apiv1/serviceusagepb"
-	"github.com/phuong-macair/gemini-api-scanner/internal/models"
+	"github.com/pnsocial/gemini-api-scanner/internal/models"
 	"go.uber.org/zap"
 	apikeysv2 "google.golang.org/api/apikeys/v2"
 	"google.golang.org/api/googleapi"
@@ -180,7 +180,7 @@ func listKeys(ctx context.Context, c *Client, projectID string) ([]*apikeysv2.V2
 
 func classifyRESTKey(k *apikeysv2.V2Key) (match bool, restrictionType string) {
 	if k.Restrictions == nil || len(k.Restrictions.ApiTargets) == 0 {
-		return true, "NONE"
+		return true, "NONE RESTRICTED"
 	}
 	var hasVertex, hasGemini bool
 	for _, t := range k.Restrictions.ApiTargets {

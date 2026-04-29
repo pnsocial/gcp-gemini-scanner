@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/phuong-macair/gemini-api-scanner/internal/models"
+	"github.com/pnsocial/gemini-api-scanner/internal/models"
 )
 
 var csvHeader = []string{

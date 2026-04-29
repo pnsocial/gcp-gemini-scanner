@@ -21,9 +21,9 @@ type Config struct {
 	DryRun   bool
 	Debug    bool
 
-	// IncludeUnbilled keeps all discovered projects in the scan regardless of billing.
-	// When false (default), only projects with billing enabled on a billing account are scanned.
-	IncludeUnbilled bool
+	// OnlyBilled if true, filters the scan to only include projects with billing enabled.
+	// When false (default), all projects are scanned and billing checks are skipped.
+	OnlyBilled bool
 }
 
 // ScopeKind indicates how the scan root was specified.

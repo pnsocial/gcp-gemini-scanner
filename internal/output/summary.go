@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/phuong-macair/gemini-api-scanner/internal/models"
+	"github.com/pnsocial/gemini-api-scanner/internal/models"
 )
 
 // RunSummary aggregates scan statistics for stderr banners.

@@ -5,19 +5,21 @@ import (
 	"fmt"
 
 	billingpb "cloud.google.com/go/billing/apiv1/billingpb"
-	"github.com/phuong-macair/gemini-api-scanner/internal/models"
+	"github.com/pnsocial/gemini-api-scanner/internal/models"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-// EnrichBillingAndFilter loads billing info per project via GetProjectBillingInfo, sets
-// BillingAccountName on success, and filters: without includeUnbilled, only projects with
-// BillingEnabled are kept. Permission denied is warned; the project is omitted unless
-// includeUnbilled is true (then kept with empty BillingAccountName).
+// EnrichBillingAndFilter loads billing info per project via GetProjectBillingInfo and filters.
+// If onlyBilled is true, only projects with billing enabled are kept and BillingAccountName is populated.
+// If onlyBilled is false, all projects are returned immediately (no billing check is performed).
 // maxConcurrent bounds simultaneous GetProjectBillingInfo calls (e.g. cfg.Workers); values < 1 are treated as 1.
-func EnrichBillingAndFilter(ctx context.Context, c *Client, includeUnbilled bool, projects []models.ProjectInfo, maxConcurrent int) ([]models.ProjectInfo, error) {
+func EnrichBillingAndFilter(ctx context.Context, c *Client, onlyBilled bool, projects []models.ProjectInfo, maxConcurrent int) ([]models.ProjectInfo, error) {
+	if !onlyBilled {
+		return projects, nil
+	}
 	if maxConcurrent < 1 {
 		maxConcurrent = 1
 	}
@@ -51,19 +53,11 @@ func EnrichBillingAndFilter(ctx context.Context, c *Client, includeUnbilled bool
 				st, ok := status.FromError(err)
 				if ok && st.Code() == codes.PermissionDenied {
 					c.Log.Warn("get project billing denied", zap.String("project", p.ProjectID), zap.Error(err))
-					if includeUnbilled {
-						pp.BillingAccountName = ""
-						slots[i] = slot{keep: true, info: pp}
-					}
 					return nil
 				}
 				return fmt.Errorf("get billing for project %s: %w", p.ProjectID, err)
 			}
 			pp.BillingAccountName = bi.GetBillingAccountName()
-			if includeUnbilled {
-				slots[i] = slot{keep: true, info: pp}
-				return nil
-			}
 			if !bi.GetBillingEnabled() {
 				return nil
 			}

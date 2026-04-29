@@ -1,4 +1,4 @@
-module github.com/phuong-macair/gemini-api-scanner
+module github.com/pnsocial/gemini-api-scanner
 
 go 1.25.7
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/phuong-macair/gemini-api-scanner/internal/config"
+	"github.com/pnsocial/gemini-api-scanner/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ var (
 	maxDepth          int
 	dryRun            bool
 	debug             bool
-	includeUnbilled   bool
+	onlyBilled        bool
 )
 
 // Execute runs the Cobra command tree.
@@ -44,7 +44,7 @@ func init() {
 	rootCmd.Flags().IntVar(&maxDepth, "max-depth", 20, "Max folder tree depth for DFS")
 	rootCmd.Flags().BoolVar(&dryRun, "dry-run", false, "List projects only, no service or API key calls")
 	rootCmd.Flags().BoolVar(&debug, "debug", false, "Verbose debug logging")
-	rootCmd.Flags().BoolVar(&includeUnbilled, "include-unbilled", false, "Include projects without billing enabled; default is only projects linked with billing enabled")
+	rootCmd.Flags().BoolVar(&onlyBilled, "only-billed", false, "Only scan projects with billing enabled; default is false (scans all projects)")
 }
 
 func buildConfig() (*config.Config, error) {
@@ -73,7 +73,7 @@ func buildConfig() (*config.Config, error) {
 		MaxDepth:          maxDepth,
 		DryRun:            dryRun,
 		Debug:             debug,
-		IncludeUnbilled:   includeUnbilled,
+		OnlyBilled:        onlyBilled,
 	}
 	if scope == config.ScopeFolders && len(cfg.FolderIDs) == 0 {
 		return nil, fmt.Errorf("no valid folder ids in --folderid")

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/phuong-macair/gemini-api-scanner/internal/models"
+	"github.com/pnsocial/gemini-api-scanner/internal/models"
 )
 
 // PrintDryRunProjects prints discovered projects as a table.
