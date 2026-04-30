@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pnsocial/gemini-api-scanner/internal/config"
 	"github.com/pnsocial/gemini-api-scanner/internal/gcp"
 	"github.com/pnsocial/gemini-api-scanner/internal/models"
@@ -27,6 +28,8 @@ func runScan(cfg *config.Config) error {
 	}
 	defer logClose()
 	defer log.Sync() //nolint:errcheck
+
+	scanID := uuid.NewString()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -187,8 +190,19 @@ func runScan(cfg *config.Config) error {
 	if interrupted.Load() {
 		rowsMu.Lock()
 		rowN := len(allRows)
+		part := append([]models.OutputRow(nil), allRows...)
 		rowsMu.Unlock()
+		elapsed := time.Since(started)
+		sumInterrupt := output.RunSummary{
+			Duration:               elapsed,
+			ProjectsQueried:        nProj,
+			WithGeminiOrVertexSvcs: geminiVertex.Load(),
+			KeyRows:                output.CountActiveKeyRows(part),
+			ProblemProjects:        problemProj.Load(),
+			CSVFilename:            cfg.Output,
+		}
 		prog.SavingDone(cfg.Output, rowN)
+		deliverPostScan(cfg, log, scanID, orgLabel, sumInterrupt, true, prog, csv)
 		return nil
 	}
 
@@ -213,6 +227,7 @@ func runScan(cfg *config.Config) error {
 		output.PrintResults(summary)
 	}
 	_, _ = fmt.Fprintf(os.Stderr, "Log: %s\n", cfg.LogFile)
+	deliverPostScan(cfg, log, scanID, orgLabel, sum, false, prog, csv)
 	return nil
 }
 

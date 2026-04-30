@@ -86,6 +86,18 @@ func (s *CSVSink) WriteRow(row models.OutputRow) error {
 	return s.w.Error()
 }
 
+// Sync flushes buffered CSV rows to stable storage before optional upload steps.
+func (s *CSVSink) Sync() error {
+	if s == nil || s.w == nil || s.f == nil {
+		return nil
+	}
+	s.w.Flush()
+	if err := s.w.Error(); err != nil {
+		return err
+	}
+	return s.f.Sync()
+}
+
 // Close flushes and closes the file.
 func (s *CSVSink) Close() error {
 	if s == nil {
