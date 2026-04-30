@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/pnsocial/gemini-api-scanner/internal/config"
 	"github.com/spf13/cobra"
@@ -20,6 +21,9 @@ var (
 	dryRun            bool
 	debug             bool
 	onlyBilled        bool
+	notifyHook        string
+	uploadGCS         bool
+	signURL           bool
 )
 
 // Execute runs the Cobra command tree.
@@ -45,6 +49,9 @@ func init() {
 	rootCmd.Flags().BoolVar(&dryRun, "dry-run", false, "List projects only, no service or API key calls")
 	rootCmd.Flags().BoolVar(&debug, "debug", false, "Verbose debug logging")
 	rootCmd.Flags().BoolVar(&onlyBilled, "only-billed", false, "Only scan projects with billing enabled; default is false (scans all projects)")
+	rootCmd.Flags().StringVar(&notifyHook, "notify-hook", "", "POST JSON webhook URL when the scan finishes (Slack/Teams-friendly payload)")
+	rootCmd.Flags().BoolVar(&uploadGCS, "upload-gcs", false, "Upload CSV to GCS after scan (requires GCS_BUCKET_NAME)")
+	rootCmd.Flags().BoolVar(&signURL, "sign-url", false, "Include a signed GET URL in the webhook (only with --upload-gcs; default TTL 1h)")
 }
 
 func buildConfig() (*config.Config, error) {
@@ -62,6 +69,12 @@ func buildConfig() (*config.Config, error) {
 	if rps <= 0 {
 		return nil, fmt.Errorf("--rps must be > 0")
 	}
+	bucket := strings.TrimSpace(os.Getenv("GCS_BUCKET_NAME"))
+	prefix := strings.TrimSpace(os.Getenv("GCS_OBJECT_PREFIX"))
+	if uploadGCS && bucket == "" {
+		return nil, fmt.Errorf("GCS_BUCKET_NAME must be set when --upload-gcs is enabled")
+	}
+
 	cfg := &config.Config{
 		OrgID:             orgID,
 		FolderIDs:         config.ParseFolderList(folderID),
@@ -74,6 +87,11 @@ func buildConfig() (*config.Config, error) {
 		DryRun:            dryRun,
 		Debug:             debug,
 		OnlyBilled:        onlyBilled,
+		NotifyHook:        strings.TrimSpace(notifyHook),
+		UploadGCS:         uploadGCS,
+		SignURL:           signURL && uploadGCS,
+		GCSBucketName:     bucket,
+		GCSObjectPrefix:   prefix,
 	}
 	if scope == config.ScopeFolders && len(cfg.FolderIDs) == 0 {
 		return nil, fmt.Errorf("no valid folder ids in --folderid")

@@ -201,6 +201,14 @@ func (r *Reporter) BumpScan() int64 {
 	return r.scanDone.Add(1)
 }
 
+// ScansFinished returns how many projects finished scanning (partial count if interrupted).
+func (r *Reporter) ScansFinished() int64 {
+	if r == nil {
+		return 0
+	}
+	return r.scanDone.Load()
+}
+
 // ScanStart shows phase 3 (spinner with live counters).
 func (r *Reporter) ScanStart(totalProjects int64) {
 	r.scanDone.Store(0)

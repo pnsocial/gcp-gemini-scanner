@@ -24,6 +24,18 @@ type Config struct {
 	// OnlyBilled if true, filters the scan to only include projects with billing enabled.
 	// When false (default), all projects are scanned and billing checks are skipped.
 	OnlyBilled bool
+
+	// NotifyHook is an HTTPS URL that receives a JSON POST when a scan finishes (empty = disabled).
+	NotifyHook string
+	// UploadGCS uploads the CSV to GCS after a successful local write (requires GCSBucketName).
+	UploadGCS bool
+	// SignURL requests a time-limited signed GET URL in the webhook payload (only with UploadGCS).
+	SignURL bool
+
+	// GCSBucketName from GCS_BUCKET_NAME when UploadGCS is true.
+	GCSBucketName string
+	// GCSObjectPrefix from GCS_OBJECT_PREFIX (optional key prefix, e.g. security-scans/).
+	GCSObjectPrefix string
 }
 
 // ScopeKind indicates how the scan root was specified.
